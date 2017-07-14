@@ -14,6 +14,10 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.8
 
+version '{{ version }}'
+group 'com.{{ domain }}.{{ projectName }}'
+description 'Dropwizard Seed Project'
+
 defaultTasks = ['clean', 'build', 'shadowJar']
 
 project.ext {
