@@ -16,7 +16,7 @@ public class App extends Application<AppConfiguration> {
 
    @Override
    public void run(AppConfiguration config, Environment env) {
-       LOGGER.info("Application name: {}", config.getAppName());
+       LOGGER.info("Application name: {} version: {}", config.getAppName(), config.getVersion());
        final PersonService personService = new PersonService();
        env.jersey().register(personService);
 

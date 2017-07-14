@@ -10,7 +10,7 @@ Base project for building a [Dropwizard](http://www.dropwizard.io) application. 
 
     ./gradlew idea
 
-### How to build the server (default) - produces a fat jar at build/libs (projectName-all.jar)
+### How to build the server (default) - produces a fat jar at build/libs/projectName-version-all.jar
 
     ./gradlew clean build shadowJar
 
