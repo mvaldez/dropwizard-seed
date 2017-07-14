@@ -13,16 +13,16 @@ Project seed files/dirs scheme were generated using Maven.
 
 ## How to create seed project
 
-	Update gradle.properties. Spaces are not supported.
+Update gradle.properties. Spaces are not supported.
 
-		projectName - project or application name e.g. com.domain.projectName
-		dropwizardVersion - Dropwizard version this project will use
-		domain - application domain name  e.g. com.domain.myapp
-		artifactId - artifact identifier e.g. MyAwesomeApp
+	projectName - project or application name e.g. com.domain.projectName
+	dropwizardVersion - Dropwizard version this project will use
+	domain - application domain name  e.g. com.domain.myapp
+	artifactId - artifact identifier e.g. MyAwesomeApp
 
-	Execute build script
+Execute build script
 
-		$ ./gradlew seed
+	$ ./gradlew seed
 	
-	Distribution located at build/distributions/<projectName>
+Distribution located at build/distributions/<projectName>
 
