@@ -1,0 +1,49 @@
+buildscript {
+	repositories {
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+	}
+}
+
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceCompatibility = 1.8
+
+defaultTasks = ['clean', 'build', 'shadowJar']
+
+project.ext {
+    configPath = "$rootProject.projectDir/config/"
+    dropwizardVersion = '{{ dropwizardVersion }}'
+	configFileName = 'app-config.yml'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.dropwizard:dropwizard-core:$dropwizardVersion"
+    
+	testCompile 'io.dropwizard:dropwizard-testing:1.0.0'
+}
+
+mainClassName = 'com.{{ domain }}.{{ projectName }}.App'
+
+jar {
+	manifest {
+		attributes('Main-Class': mainClassName)
+	}
+}
+
+shadowJar {
+	mergeServiceFiles()
+}
+
+run {
+    args 'server', configPath + configFileName
+}

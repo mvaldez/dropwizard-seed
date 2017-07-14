@@ -1,0 +1,120 @@
+apply plugin: 'application'
+apply plugin: 'idea'
+sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.mitchellbosecke:pebble:2.2.2'
+    }
+}
+
+defaultTasks = ['clean', 'seed']
+
+/**
+ * Executes a `cmd` in a subprocess, blocking until
+ * it has completed.  When completed, the `whenDone`
+ * callback is invoked with a map with the following
+ * key/values:
+ *
+ * - exitValue : the return code of the process
+ * - out : the stdout string of the process
+ * - err : the stderr string of the process
+ */
+def exec(cmd, whenDone) {
+    println "[exec] ${cmd}"
+    Process result = cmd.execute();
+    def sbout = new StringBuffer();
+    def sberr = new StringBuffer();
+    result.waitForProcessOutput(sbout, sberr);
+    result.waitFor();
+    whenDone?.call([exitValue:result.exitValue(), out:sbout.toString(), err:sberr.toString()])
+}
+
+/**
+ * Gets the Gradle property with the provided name if exists;
+ * otherwise throws GradleException
+ */
+def getProp = { s ->
+    if (!project.hasProperty(s)) throw new GradleException("$s is a required property for task ${path}")
+    project[s]
+}
+
+/**
+ * Generates a file from the given PebbleTemplate and context map
+ */
+def generate = { filename, template, context ->
+    def f = file(filename)
+    f.getParentFile().mkdirs()
+    f.withWriter { w ->
+        template.evaluate(w, context)
+    }
+}
+
+/**
+ * Util method replaces a ---var--- pattern with the value
+ * of context[var]
+ */
+def subVar(str, context) {
+    def m = str =~ /---([^-]+?)---/
+    def sb = new StringBuffer()
+    while (m.find()) {
+        def replacement = context[m.group(1)]
+        if (!replacement) replacement = m.group()
+        m.appendReplacement(sb, replacement)
+    }
+    m.appendTail(sb).toString()
+}
+
+/**
+ * Extra properties
+ */
+ext {
+    context = ["dropwizardVersion" : getProp('dropwizardVersion'),
+               "projectName"           : getProp('projectName').toLowerCase(),
+               "domain"             : getProp('domain').toLowerCase(),
+               "artifactId"        : getProp('artifactId'),
+               "user"               : System.getProperty('user.name'),
+               "currentDate"        : new Date()
+    ]
+    generatedProjDir = file("${distsDir}/${context.projectName}")
+}
+
+/**
+ * Generates a nucleus product extension seed project
+ */
+task seed {
+
+    // generate the seed first
+    doFirst {
+        final TMPL_EXT = '.tmpl'
+        def seedDir = file("${projectDir}/seed")
+        def templateFiles = fileTree(seedDir).matching { include "**/*${TMPL_EXT}" }
+        def standardFiles = fileTree(seedDir).matching { exclude "**/*${TMPL_EXT}" }
+
+        // return a Path to the output file
+        // that should be generated for the given templateFile
+        def toOutputFile = { templateFile ->
+            def relPath = seedDir.toPath().relativize(templateFile.toPath())
+            relPath = subVar("${relPath}", context)
+            generatedProjDir.toPath().resolve(relPath)
+        }
+
+        // copy non-template files
+        standardFiles.each { standardFile ->
+            def f = file("${toOutputFile(standardFile)}")
+            f.getParentFile().mkdirs()
+            java.nio.file.Files.copy(standardFile.toPath(), f.toPath())
+        }
+
+        // generate files from  templates
+        def pebble = new com.mitchellbosecke.pebble.PebbleEngine.Builder().build();
+        templateFiles.each { templateFile ->
+            generate("${toOutputFile(templateFile)}" - TMPL_EXT,
+                     pebble.getTemplate("${templateFile}"),
+                     context);
+        }
+    }
+}
