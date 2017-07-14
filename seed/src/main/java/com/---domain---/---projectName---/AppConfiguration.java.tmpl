@@ -9,6 +9,9 @@ public class AppConfiguration extends Configuration {
    @NotEmpty
    private String appName;
 
+   @NotEmpty
+   private String version;
+
    @JsonProperty
    public String getAppName() {
       return appName;
@@ -17,5 +20,15 @@ public class AppConfiguration extends Configuration {
    @JsonProperty
    public void setAppName(final String appName) {
       this.appName = appName;
+   }
+
+   @JsonProperty
+   public String getVersion() {
+      return version;
+   }
+
+   @JsonProperty
+   public void setVersion(final String version) {
+      this.version = version;
    }
 }
