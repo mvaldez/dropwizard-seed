@@ -11,19 +11,35 @@ Project seed files/dirs scheme were generated using Maven.
         -DgroupId=com.domain.projectName
         -DartifactId=MyApp
 
+## Versions
+
+    - java 8+
+    - dropwizard-core 1.1.2
+    - swagger-api 1.5.15
+    - swagger-ui 2.2.10
+    - gradle 3.1.0
+
 ## How to create seed project
 
 Update gradle.properties. Spaces are not supported.
 
     projectName - project or application name e.g. com.domain.projectName
     version - seed project's initial version
-    dropwizardVersion - Dropwizard version this project will use
     domain - application domain name  e.g. com.domain.myapp
-    artifactId - artifact identifier e.g. MyAwesomeApp
+    subDomain - application sub domain e.g. subdomain.domain.myapp
 
 Execute build script
 
     $ ./gradlew seed
 
-Distribution located at build/distributions/<projectName>
+Distribution location
 
+    dropwizard-seed/build/distributions/<projectName>
+
+## Acknowledgements
+
+* Federico Recio [@federecio](http://twitter.com/federecio)
+* Smoke Turner [smoketurner](https://github.com/smoketurner)
+* Mitchell Bosecke [Pebble](http://www.mitchellbosecke.com/pebble/home) template engine support
+* John Rengelman [ShadowJar](https://github.com/johnrengelman/shadow)
+* Mike Lynch [nycnik](https://github.com/nycynik)

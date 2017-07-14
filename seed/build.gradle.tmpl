@@ -1,11 +1,11 @@
 buildscript {
-	repositories {
-		jcenter()
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-	}
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
 }
 
 apply plugin: 'application'
@@ -15,15 +15,14 @@ apply plugin: 'com.github.johnrengelman.shadow'
 sourceCompatibility = 1.8
 
 version '{{ version }}'
-group 'com.{{ domain }}.{{ projectName }}'
+group '{{ subDomain }}.{{ domain }}.{{ projectName }}'
 description 'Dropwizard Seed Project'
 
 defaultTasks = ['clean', 'build', 'shadowJar']
 
 project.ext {
     configPath = "$rootProject.projectDir/config/"
-    dropwizardVersion = '{{ dropwizardVersion }}'
-	configFileName = 'app-config.yml'
+    configFileName = 'app-config.yml'
 }
 
 repositories {
@@ -31,21 +30,22 @@ repositories {
 }
 
 dependencies {
-    compile "io.dropwizard:dropwizard-core:$dropwizardVersion"
-    
-	testCompile 'io.dropwizard:dropwizard-testing:1.0.0'
+    compile "io.dropwizard:dropwizard-core:1.1.2"
+    compile 'com.smoketurner:dropwizard-swagger:1.1.1-1'
+
+    testCompile 'io.dropwizard:dropwizard-testing:1.0.0'
 }
 
-mainClassName = 'com.{{ domain }}.{{ projectName }}.App'
+mainClassName = '{{ subDomain }}.{{ domain }}.{{ projectName }}.App'
 
 jar {
-	manifest {
-		attributes('Main-Class': mainClassName)
-	}
+    manifest {
+        attributes('Main-Class': mainClassName)
+    }
 }
 
 shadowJar {
-	mergeServiceFiles()
+    mergeServiceFiles()
 }
 
 run {

@@ -74,9 +74,8 @@ def subVar(str, context) {
 ext {
     context = ["projectName"        : getProp('projectName').toLowerCase(),
                "version"            : getProp('version'),
-               "dropwizardVersion"  : getProp('dropwizardVersion'),
                "domain"             : getProp('domain').toLowerCase(),
-               "artifactId"         : getProp('artifactId'),
+               "subDomain"          : getProp('subDomain').toLowerCase(),
                "user"               : System.getProperty('user.name'),
                "currentDate"        : new Date()
     ]
