@@ -5,6 +5,8 @@ import io.dropwizard.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.{{ domain }}.{{ projectName }}.resources.PersonService;
+
 public class App extends Application<AppConfiguration> {
    public static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
@@ -13,7 +15,12 @@ public class App extends Application<AppConfiguration> {
    }
 
    @Override
-   public void run(final AppConfiguration configuration, final Environment environment) throws Exception {
-      LOGGER.info("Application name: {}", configuration.getAppName());
+   public void run(AppConfiguration config, Environment env) {
+       LOGGER.info("Application name: {}", config.getAppName());
+       final PersonService personService = new PersonService();
+       env.jersey().register(personService);
+
+       env.healthChecks().register("template",
+           new MyHealthCheck(config.getVersion()));
    }
 }
