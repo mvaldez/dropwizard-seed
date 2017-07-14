@@ -1,11 +1,14 @@
-package com.{{ domain }}.{{ projectName }};
+package {{ subDomain }}.{{ domain }}.{{ projectName }};
+
+import {{ subDomain }}.{{ domain }}.{{ projectName }}.resources.PersonService;
 
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.{{ domain }}.{{ projectName }}.resources.PersonService;
 
 public class App extends Application<AppConfiguration> {
    public static final Logger LOGGER = LoggerFactory.getLogger(App.class);
@@ -22,5 +25,15 @@ public class App extends Application<AppConfiguration> {
 
        env.healthChecks().register("template",
            new MyHealthCheck(config.getVersion()));
+   }
+
+   @Override
+   public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+       bootstrap.addBundle(new SwaggerBundle<AppConfiguration>() {
+           @Override
+           protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(AppConfiguration config) {
+               return config.swaggerBundleConfiguration;
+           }
+       });
    }
 }
