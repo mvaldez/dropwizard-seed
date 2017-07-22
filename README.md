@@ -1,6 +1,6 @@
-# Dropwizard Seed Project
+# Dropwizard/MongoDB Java Seed Project
 
-This generates all the base projects files and directories for a Dropwizard application.  The build script utilizes Mitchell Bosecke's [Pebble](http://www.mitchellbosecke.com/pebble/home) template library.
+This generates all the base projects files and directories for a Dropwizard application with MongoDB support.  The build script utilizes Mitchell Bosecke's [Pebble](http://www.mitchellbosecke.com/pebble/home) template library.
 
 The generated seed project is setup to work with both Gradle and Maven.
 
@@ -43,3 +43,5 @@ Distribution location
 * Mitchell Bosecke [Pebble](http://www.mitchellbosecke.com/pebble/home) template engine support
 * John Rengelman [ShadowJar](https://github.com/johnrengelman/shadow)
 * Mike Lynch [nycnik](https://github.com/nycynik)
+* Morphia [morphia](http://mongodb.github.io/morphia)
+* MongoDB Java Driver [mongodb](https://mongodb.github.io/mongo-java-driver)
