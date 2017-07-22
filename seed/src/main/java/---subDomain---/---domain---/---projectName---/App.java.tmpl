@@ -2,38 +2,63 @@ package {{ subDomain }}.{{ domain }}.{{ projectName }};
 
 import {{ subDomain }}.{{ domain }}.{{ projectName }}.resources.PersonService;
 
+import com.mongodb.MongoClient;
 import io.dropwizard.Application;
+import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class App extends Application<AppConfiguration> {
-   public static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(App.class);
+    public static final String DEFAULT_DB_NAME = "{{ databaseName }}";
 
-   public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
       new App().run(args);
-   }
+    }
 
-   @Override
-   public void run(AppConfiguration config, Environment env) {
-       LOGGER.info("Application name: {} version: {}", config.getAppName(), config.getVersion());
-       final PersonService personService = new PersonService();
-       env.jersey().register(personService);
+    @Override
+    public void run(AppConfiguration config, Environment env) {
+     LOGGER.info("Application name: {} version: {}", config.getAppName(), config.getVersion());
 
-       env.healthChecks().register("template",
-           new MyHealthCheck(config.getVersion()));
-   }
+     // add managed resource
+     final MongoClient mongoClient = new MongoClient();
+     env.lifecycle().manage(new Managed() {
+        @Override
+        public void start() throws Exception {
 
-   @Override
-   public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+        }
+
+        @Override
+        public void stop() throws Exception {
+           mongoClient.close();
+        }
+     });
+
+     // create datastore
+     Datastore datastore = new Morphia().createDatastore(mongoClient, DEFAULT_DB_NAME);
+
+     // add resources
+     final PersonService personService = new PersonService(datastore);
+     env.jersey().register(personService);
+
+     // add health checks
+     env.healthChecks().register("template",
+                                 new MyHealthCheck(datastore));
+    }
+
+    @Override
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
        bootstrap.addBundle(new SwaggerBundle<AppConfiguration>() {
            @Override
            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(AppConfiguration config) {
                return config.swaggerBundleConfiguration;
            }
        });
-   }
+    }
 }

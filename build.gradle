@@ -76,6 +76,7 @@ ext {
                "version"            : getProp('version'),
                "domain"             : getProp('domain').toLowerCase(),
                "subDomain"          : getProp('subDomain').toLowerCase(),
+               "databaseName"       : getProp('databaseName'),
                "user"               : System.getProperty('user.name'),
                "currentDate"        : new Date()
     ]

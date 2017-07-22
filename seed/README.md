@@ -1,4 +1,4 @@
-# Dropwizard Seed Project
+# Dropwizard/MongoDB Java Seed Project
 
 Base project for building a [Dropwizard](http://www.dropwizard.io) application.  Creates a fat jar using John Rengelman's [ShadowJar](https://github.com/johnrengelman/shadow) plugin.
 
@@ -9,6 +9,8 @@ Base project for building a [Dropwizard](http://www.dropwizard.io) application. 
     - swagger-api 1.5.15
     - swagger-ui 2.2.10
     - gradle 3.1.0
+    - mongodb java driver 3.4.2
+    - morphia 1.3.2
 
 ## How to generate Intellij project files
 
@@ -38,3 +40,4 @@ Produces a fat jar at build/libs/projectName-version-all.jar
 * Smoke Turner [smoketurner](https://github.com/smoketurner)
 * Mike Lynch [nycnik](https://github.com/nycynik)
 * John Rengelman [ShadowJar](https://github.com/johnrengelman/shadow)
+* Morphia [morphia](http://mongodb.github.io/morphia)

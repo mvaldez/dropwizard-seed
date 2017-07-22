@@ -1,0 +1,53 @@
+package {{ subDomain }}.{{ domain }}.{{ projectName }}.persistence;
+
+import {{ subDomain }}.{{ domain }}.{{ projectName }}.data.Person;
+
+import javax.ws.rs.WebApplicationException;
+
+import org.mongodb.morphia.Datastore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+public class PersonDao {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonDao.class);
+    private Datastore datastore;
+
+    public PersonDao(Datastore datastore) {
+        this.datastore = datastore;
+    }
+
+    public String addPerson(Person person) {
+        try {
+            datastore.save(person);
+        } catch (Exception e) {
+            // TODO: implement robust error handling logic
+            LOGGER.error("Unable to save entity Person {} to datastore!", person);
+            throw new WebApplicationException(403);
+        }
+        return person.getId();
+    }
+
+    public Person getPerson(String id) {
+        Person person = datastore.createQuery(Person.class).field("_id").equal(id).get();
+        if (person == null) {
+            throw new WebApplicationException(404);
+        }
+
+        return person;
+    }
+
+    public List<Person> getAll() {
+        return datastore.createQuery(Person.class).asList();
+    }
+
+    public long deletePerson(String id) {
+        Person person = datastore.createQuery(Person.class).field("_id").equal(id).get();
+        if (person == null) {
+            throw new WebApplicationException(404);
+        }
+        datastore.delete(person);
+        return datastore.createQuery(Person.class).count();
+    }
+}

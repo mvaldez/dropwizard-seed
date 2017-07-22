@@ -1,22 +1,26 @@
 package {{ subDomain }}.{{ domain }}.{{ projectName }};
 
-import {{ subDomain }}.{{ domain }}.{{ projectName }}.persistence.PersonDB;
 import com.codahale.metrics.health.HealthCheck;
+import com.mongodb.CommandResult;
+import com.mongodb.MongoException;
+import org.mongodb.morphia.Datastore;
 
 public class MyHealthCheck extends HealthCheck {
-    private final String version;
+    private final Datastore datastore;
 
-    public MyHealthCheck(String version) {
-        this.version = version;
+    public MyHealthCheck(Datastore datastore) {
+        this.datastore = datastore;
     }
 
     @Override
     protected Result check() throws Exception {
-        if (PersonDB.getCount() == 0) {
-            return Result.unhealthy("No persons in DB! Version: " +
-                    this.version);
+        try {
+            final CommandResult stats = datastore.getDB().getStats();
+            if (!stats.ok()) return Result.unhealthy(stats.getErrorMessage());
+        } catch (MongoException ex) {
+            return Result.unhealthy(ex.getMessage());
         }
-        return Result.healthy("OK with version: " + this.version +
-                ". Persons count: " + PersonDB.getCount());
+
+        return Result.healthy();
     }
 }

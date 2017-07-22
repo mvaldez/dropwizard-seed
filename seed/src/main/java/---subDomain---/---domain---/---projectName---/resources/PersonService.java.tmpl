@@ -1,7 +1,7 @@
 package {{ subDomain }}.{{ domain }}.{{ projectName }}.resources;
 
 import {{ subDomain }}.{{ domain }}.{{ projectName }}.data.Person;
-import {{ subDomain }}.{{ domain }}.{{ projectName }}.persistence.PersonDB;
+import {{ subDomain }}.{{ domain }}.{{ projectName }}.persistence.PersonDao;
 
 import java.util.List;
 
@@ -13,53 +13,88 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.codahale.metrics.annotation.Timed;
+import java.net.URI;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.mongodb.morphia.Datastore;
 
+/**
+ * Person resource
+ */
+@Api(value = "person", description = "Endpoint for Person operations")
 @Path("/person")
-@Api(value="/person", description="Operations on the Person object")
-@Produces({"application/json"})
+@Produces(MediaType.APPLICATION_JSON)
 public class PersonService {
+    private final PersonDao personDao;
 
-    public PersonService() {
+    public PersonService(Datastore datastore) {
+        personDao = new PersonDao(datastore);
     }
 
-    @GET
-    @Timed
-    @Path("/get/{id}")
+    @POST()
+    @Path("save")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Adds a new Person entity", notes = "returns uri response", response = Response.class)
+    @ApiResponses(value = {
+       @ApiResponse(code = 200, message = "Successful add of Person entity", response = Person.class),
+        @ApiResponse(code = 403, message = "Unable to save user"),
+        @ApiResponse(code = 500, message = "Internal server error") }
+    )
+    public Response addPerson(@ApiParam(value = "person") Person person) {
+        personDao.addPerson(person);
+        return Response.created(URI.create(person.getId())).entity(person).build();
+    }
+
+    @GET()
+    @Path("get/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Person getPerson(@ApiParam(value = "Person Id", allowableValues = "range[1,10]",
-            required = true) @PathParam("id") int id) {
-        return PersonDB.getById(id);
+    @ApiOperation(value = "Gets a Person entity by Id", notes = "returns uri response", response = Response.class)
+    @ApiResponses(value = {
+       @ApiResponse(code = 200, message = "Successful retrieval of person entity", response = Person.class),
+       @ApiResponse(code = 404, message = "Person with given id does not exist"),
+       @ApiResponse(code = 500, message = "Internal server error") }
+    )
+    public Response getPerson(@ApiParam(value = "id") @PathParam("id") String id) {
+        Person person = personDao.getPerson(id);
+        return Response.created(URI.create(id)).entity(person).build();
     }
 
     @GET
-    @Timed
-    @Path("/remove")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String removePerson() {
-        PersonDB.remove();
-        return "Last person remove. Total count: " + PersonDB.getCount();
-    }
-
-    @GET
-    @Timed
-    @Path("/all")
+    @Path("all")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Person> getPersons() {
-        return PersonDB.getAll();
+    @ApiResponses(value = {
+       @ApiResponse(code = 200, message = "Successful retrieval of Person entities", response = Person.class),
+       @ApiResponse(code = 500, message = "Internal server error") }
+    )
+    public List<Person> getAll() {
+        return personDao.getAll();
     }
 
-    @POST
-    @Timed
-    @Path("/save")
+    @DELETE
+    @Path("remove/{id}")
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes({MediaType.APPLICATION_JSON})
-    public String addPerson(Person person) {
-        return PersonDB.save(person);
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiResponses(value = {
+       @ApiResponse(code = 200, message = "Successful removal of person entity", response = String.class),
+       @ApiResponse(code = 500, message = "Internal server error") }
+    )
+    public String deletePerson(@ApiParam("id") String id) {
+         long count = personDao.deletePerson(id);
+         return "Removed person with id " + id + ". New Total Count = " + count;
     }
 }
