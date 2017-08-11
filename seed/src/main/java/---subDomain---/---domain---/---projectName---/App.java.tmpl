@@ -2,6 +2,8 @@ package {{ subDomain }}.{{ domain }}.{{ projectName }};
 
 import {{ subDomain }}.{{ domain }}.{{ projectName }}.resources.PersonService;
 
+import {{ subDomain }}.{{ domain }}.{{ projectName }}.data.Person;
+
 import com.mongodb.MongoClient;
 import io.dropwizard.Application;
 import io.dropwizard.lifecycle.Managed;
@@ -24,41 +26,44 @@ public class App extends Application<AppConfiguration> {
 
     @Override
     public void run(AppConfiguration config, Environment env) {
-     LOGGER.info("Application name: {} version: {}", config.getAppName(), config.getVersion());
+    LOGGER.info("Application name: {} version: {}", config.getAppName(), config.getVersion());
 
-     // add managed resource
-     final MongoClient mongoClient = new MongoClient();
-     env.lifecycle().manage(new Managed() {
-        @Override
+    // add managed resource
+    final MongoClient mongoClient = new MongoClient();
+    env.lifecycle().manage(new Managed() {
+    @Override
         public void start() throws Exception {
 
-        }
+    }
 
-        @Override
+    @Override
         public void stop() throws Exception {
-           mongoClient.close();
-        }
-     });
+       mongoClient.close();
+    }
+    });
 
-     // create datastore
-     Datastore datastore = new Morphia().createDatastore(mongoClient, DEFAULT_DB_NAME);
+    // create datastore
+    Morphia m = new Morphia();
+    m.map(Person.class); // ensures indexes are created for this entity
+    Datastore datastore = m.createDatastore(mongoClient, DEFAULT_DB_NAME);
+    datastore.ensureIndexes(); // generates indexes for all mapped entities
 
-     // add resources
-     final PersonService personService = new PersonService(datastore);
-     env.jersey().register(personService);
+    // add resources
+    final PersonService personService = new PersonService(datastore);
+    env.jersey().register(personService);
 
-     // add health checks
-     env.healthChecks().register("template",
-                                 new MyHealthCheck(datastore));
+    // add health checks
+    env.healthChecks().register("template",
+                             new MyHealthCheck(datastore));
     }
 
     @Override
     public void initialize(Bootstrap<AppConfiguration> bootstrap) {
-       bootstrap.addBundle(new SwaggerBundle<AppConfiguration>() {
-           @Override
-           protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(AppConfiguration config) {
-               return config.swaggerBundleConfiguration;
-           }
-       });
+        bootstrap.addBundle(new SwaggerBundle<AppConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(AppConfiguration config) {
+                return config.swaggerBundleConfiguration;
+            }
+        });
     }
 }
